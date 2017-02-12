@@ -17,7 +17,8 @@ import { filterableTable } from '../styles/filterableTable.scss';
 export default class FilterableTable extends Component {
     static propTypes = {
         filter: PropTypes.string,
-        onFilter: PropTypes.func
+        onFilter: PropTypes.func,
+        params: PropTypes.object
     }
 
     constructor(props, context) {
@@ -26,6 +27,7 @@ export default class FilterableTable extends Component {
 
     render() {
         let input;
+        console.log(this.props.params.splat);
 
         return (
             <div className={filterableTable}>
