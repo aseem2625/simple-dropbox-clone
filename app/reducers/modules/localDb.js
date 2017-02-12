@@ -56,13 +56,13 @@ const localDB = (() => {
     /*
      -> Key value mapping of folders for faster DB search. Format is simplified for frontend-only task.
      -> In case of folder/file movement in hierarchy, ancestors part ahead of latest parent will be removed.
-     -> No ancenstory means top in hierarchy level.
+     -> Empty ancenstor array means top in hierarchy level.
      -> Parent ids in order of hierarchy to simplify DB parsing for finding path.
      */
     const userCollection = {
-        'myFolder': {id: 2323},
-        'DummyFolder': {id: 26283, ancestors: [2323]},
-        'Public Folder': {id: 23283, ancestors: [2323, 26283]}
+        2323: {ancestors: []},
+        26283: {ancestors: [2323]},
+        23283: {ancestors: [2323, 26283]}
     };
 
     /* Parse itemCollection with itemId */
@@ -94,35 +94,37 @@ const localDB = (() => {
             }
         }
 
-        // Remove item id in response since FE should be unaware of it
+        // Don't keep parent id in response since FE need not know it
         itemReq = _.omit(itemReq, ['id', 'parent']);
-        for (const childKey in itemReq.children) {
-            if (itemReq.children.hasOwnProperty(childKey)) {
-                itemReq.children[childKey] = _.omit(itemReq.children[childKey], ['id']);
-            }
-        }
+
         return itemReq;
     };
 
-    /* Resolve folderNames into id from userCollection mapping */
-    const _getPathAncestors =  (folderName) => {
-        const result = userCollection[folderName];
-        return {itemId: result.id, itemAncestors: result.ancestors};
+    /* Get ancestors list from userCollection mapping */
+    const _getPathAncestors =  (itemId) => {
+        const ancestorsList = userCollection[itemId].ancestors;
+        const data = [];
+
+        ancestorsList.forEach((ancestorId)=> {
+            const ancestor = {};
+            ancestor.id = ancestorId;
+            ancestor.name = _getItemNameById(ancestorId);
+            data.push(ancestor);
+        });
+
+        return ancestorsList;
     };
 
     return {
         /* only for type: folder */
-        getItemByName: (folderName) => {
-            if (!folderName) {
+        getItemById: (itemId) => {
+            if (!itemId) {
                 return {success: false, reason: 'Invalid Path Requested' };
             }
             const data = {};
-            const itemInfo = _getPathAncestors(folderName);
+            data.path = _getPathAncestors(itemId);
 
-            if (itemInfo.itemAncestors) {
-                data.path = itemInfo.itemAncestors;
-            }
-            data.itemDetails = _getItemDetailsById(itemInfo.itemId);
+            data.itemDetails = _getItemDetailsById(itemId);
 
             const response = {
                 success: true,
