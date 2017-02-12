@@ -4,8 +4,8 @@ import filter from './filter';
 
 
 const rootReducer = combineReducers({
-    filter,
-    routing
+    routing,
+    filter
 });
 
 export default rootReducer;

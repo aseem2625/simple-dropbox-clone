@@ -17,6 +17,7 @@
   "author": "Jean-Pierre Sierens",
   "license": "MIT",
   "dependencies": {
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "file-loader": "^0.9.0",
     "react": "^15.0.2",
     "react-dom": "^15.0.2",
