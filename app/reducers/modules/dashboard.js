@@ -1,3 +1,7 @@
+import localDB from './localDb';
+
+console.log(localDB.getItemByName('myFolder'));
+
 // ACTIONS
 const FILTER = 'FILTER';
 
