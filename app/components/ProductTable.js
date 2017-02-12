@@ -31,4 +31,8 @@ ProductTable.propTypes = {
     filter: PropTypes.string
 };
 
+ProductTable.defaultProps = {
+    filter: ''
+};
+
 export default ProductTable;

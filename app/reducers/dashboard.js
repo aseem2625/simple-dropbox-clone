@@ -2,10 +2,16 @@
 const FILTER = 'FILTER';
 
 // REDUCER
-const filter = (state = '', action) => {
+const initialState = {
+};
+
+const dashboard = (state = initialState, action) => {
     switch (action.type) {
         case FILTER:
-            return action.filter;
+            return {
+                ...state,
+                filter: action.filter
+            };
         default:
             return state;
     }
@@ -19,4 +25,4 @@ export function filterTable(filterVal) {
     };
 }
 
-export default filter;
+export default dashboard;

@@ -2,19 +2,19 @@ import React, { Component, PropTypes } from 'react';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 
-import { filterTable } from '../reducers/filter';
+import { filterTable } from '../reducers/dashboard';
 import ProductTable from '../components/ProductTable';
 import { filterableTable } from '../styles/filterableTable.scss';
 
 
 @connect(
     state => ({
-        filter: state.filter
+        filter: state.dashboard.filter
     }),
     dispatch => bindActionCreators({onFilter: filterTable}, dispatch)
 )
 
-export default class FilterableTable extends Component {
+export default class Home extends Component {
     static propTypes = {
         filter: PropTypes.string,
         onFilter: PropTypes.func,
@@ -23,6 +23,13 @@ export default class FilterableTable extends Component {
 
     constructor(props, context) {
         super(props, context);
+
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange(e) {
+        console.log(e.target.value);
+        this.props.onFilter(e.target.value);
     }
 
     render() {
@@ -31,14 +38,9 @@ export default class FilterableTable extends Component {
 
         return (
             <div className={filterableTable}>
-                <input
-                    value={this.props.filter}
-                    ref={node => {input = node;}}
-                    onChange={() => this.props.onFilter(input.value)} />
-
+                <input onChange={this.handleChange} />
                 <ProductTable filter={this.props.filter} />
             </div>
         );
     }
-
 }
