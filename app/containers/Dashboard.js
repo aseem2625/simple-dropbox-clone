@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 
-import { filterTable } from '../reducers/dashboard';
+import { filterTable } from '../reducers/modules/dashboard';
 import ProductTable from '../components/ProductTable';
 import { filterableTable } from '../styles/filterableTable.scss';
 
@@ -14,7 +14,7 @@ import { filterableTable } from '../styles/filterableTable.scss';
     dispatch => bindActionCreators({onFilter: filterTable}, dispatch)
 )
 
-export default class Home extends Component {
+export default class Dashboard extends Component {
     static propTypes = {
         filter: PropTypes.string,
         onFilter: PropTypes.func,
@@ -35,6 +35,9 @@ export default class Home extends Component {
     render() {
         let input;
         console.log(this.props.params.splat);
+
+        // const splitPath = this.props.params.splat.split('/');
+        // console.log(splitPath);
 
         return (
             <div className={filterableTable}>

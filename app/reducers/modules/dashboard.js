@@ -1,6 +1,7 @@
 // ACTIONS
 const FILTER = 'FILTER';
 
+
 // REDUCER
 const initialState = {
 };
