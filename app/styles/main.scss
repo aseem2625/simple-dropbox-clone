@@ -1,0 +1,23 @@
+.appContainer {
+	height: 100%;
+}
+
+.appHeader {
+	padding: 18px;
+	display: table;
+
+	&Title {
+		font-size: 22px;
+		color: #2fa3fb;
+		display: table-cell;
+	}
+}
+
+
+.footer {
+	margin-top: 20px;
+
+	a {
+		padding: 5px 10px 5px 0;
+	}
+}

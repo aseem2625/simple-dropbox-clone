@@ -1,15 +1,12 @@
 import React, { PropTypes } from 'react';
-import { Link } from 'react-router';
-import { footer } from '../styles/footer.scss';
+import styles from '../styles/main.scss';
 
 const App = ({ children }) =>
-    <div>
-        <h1>Filter table</h1>
+    <div className={styles.appContainer}>
+        <div className={styles.appHeader}>
+            <span className={styles.appHeaderTitle}>Dropbox</span>
+        </div>
         { children }
-        <footer className={footer}>
-            <Link to="/">Filterable Table</Link>
-            <Link to="/about">About</Link>
-        </footer>
     </div>;
 
 App.propTypes = {
