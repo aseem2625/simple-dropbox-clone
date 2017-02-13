@@ -1,9 +1,8 @@
 import localDB from './localDb';
 
-console.log(localDB.getItemById(2323));
-
 // ACTIONS
 const FILTER = 'FILTER';
+const FETCH_ITEM = 'FETCH_ITEM';
 
 
 // REDUCER
@@ -17,6 +16,12 @@ const dashboard = (state = initialState, action) => {
                 ...state,
                 filter: action.filter
             };
+
+        case FETCH_ITEM:
+            return {
+                ...state,
+                result: action.result
+            };
         default:
             return state;
     }
@@ -27,6 +32,18 @@ export function filterTable(filterVal) {
     return {
         type: FILTER,
         filter: filterVal
+    };
+}
+
+export function getItemsByUrl(url) {
+    // add middleware later to support mapping with promise and actions
+    const result = localDB.getItemByUrl(url);
+    console.log('............RESULT.............');
+    console.log(result);
+
+    return {
+        type: FETCH_ITEM,
+        result
     };
 }
 
