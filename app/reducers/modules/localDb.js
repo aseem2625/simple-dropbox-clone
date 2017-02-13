@@ -9,6 +9,13 @@ const localDB = (() => {
      */
     const itemCollection = [
         {
+            id: 0, // 0 means root 0 level children
+            parent: 0, // 0 means it's at 0 level
+            children: [
+                {id: 2323, type: 'folder'}
+            ]
+        },
+        {
             id: 2323,
             type: 'folder',
             name: 'myFolder',
@@ -60,9 +67,57 @@ const localDB = (() => {
      -> Parent ids in order of hierarchy to simplify DB parsing for finding path.
      */
     const userCollection = {
+        0: {ancestors: null},
         2323: {ancestors: []},
         26283: {ancestors: [2323]},
         23283: {ancestors: [2323, 26283]}
+    };
+
+    /* Parse itemCollection with name */
+    const _getItemDetailsByName = (itemName) => {
+        for (const itemKey in itemCollection) {
+            if (itemCollection.hasOwnProperty(itemKey)) {
+                if (itemCollection[itemKey].itemName === itemName) {
+                    return itemCollection[itemKey];
+                }
+            }
+        }
+        return null; // return if item doesn't exist
+    };
+
+    /* Check left->right as per our data organization. */
+    const _returnDetailsIfUrlCorrect = (url) => {
+        let lastSplatDetails = null;
+
+        if (url.length === 1) {
+            lastSplatDetails = _getItemDetailsById(0);
+        } else {
+            url.every((itemName) => {
+                const curSplatDetails = _getItemDetailsByName(itemName);
+                if (!curSplatDetails) {
+                    return false;
+                }
+                if (lastSplatDetails) {
+                    if (curSplatDetails.parent !== lastSplatDetails .id) {
+                        return false;
+                    }
+                }
+                lastSplatDetails = curSplatDetails;
+                return true;
+            });
+
+            /* Get name of children items */
+            for (const childKey in lastSplatDetails.children) {
+                if (lastSplatDetails.children.hasOwnProperty(childKey)) {
+                    lastSplatDetails.children[childKey].name = _getItemNameById(lastSplatDetails.children[childKey].id);
+                }
+            }
+
+            // Don't keep parent id in response since FE need not know it
+            lastSplatDetails = _.omit(lastSplatDetails, ['parent']);
+        }
+
+        return lastSplatDetails;
     };
 
     /* Parse itemCollection with itemId */
@@ -95,7 +150,7 @@ const localDB = (() => {
         }
 
         // Don't keep parent id in response since FE need not know it
-        itemReq = _.omit(itemReq, ['id', 'parent']);
+        itemReq = _.omit(itemReq, ['parent']);
 
         return itemReq;
     };
@@ -105,26 +160,45 @@ const localDB = (() => {
         const ancestorsList = userCollection[itemId].ancestors;
         const data = [];
 
-        ancestorsList.forEach((ancestorId)=> {
-            const ancestor = {};
-            ancestor.id = ancestorId;
-            ancestor.name = _getItemNameById(ancestorId);
-            data.push(ancestor);
-        });
+        if (ancestorsList) {
+            ancestorsList.forEach((ancestorId)=> {
+                const ancestor = {};
+                ancestor.id = ancestorId;
+                ancestor.name = _getItemNameById(ancestorId);
+                data.push(ancestor);
+            });
+        }
 
-        return ancestorsList;
+        return data;
     };
 
     return {
         /* only for type: folder */
         getItemById: (itemId) => {
             if (!itemId) {
-                return {success: false, reason: 'Invalid Path Requested' };
+                return {success: false, reason: 'Invalid Folder Requested' };
             }
             const data = {};
             data.path = _getPathAncestors(itemId);
 
             data.itemDetails = _getItemDetailsById(itemId);
+
+            const response = {
+                success: true,
+                result: data
+            };
+            return response; // (Add promise later to simulate backend)
+        },
+
+        getItemByUrl: (url) => {
+            // Check if hierarchy is correct. If yes then return itemDetails for the path
+            if (!url) {
+                return {success: false, reason: 'Invalid Url Requested' };
+            }
+
+            const data = {};
+            data.itemDetails = _returnDetailsIfUrlCorrect(url);
+            data.path = _getPathAncestors(data.itemDetails.id);
 
             const response = {
                 success: true,
