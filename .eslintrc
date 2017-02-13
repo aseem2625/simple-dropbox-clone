@@ -48,7 +48,7 @@
      * Possible errors
      */
     "no-cond-assign": [2, "always"], // http://eslint.org/docs/rules/no-cond-assign
-    "no-console": 1,                 // http://eslint.org/docs/rules/no-console
+    "no-console": 0,                 // http://eslint.org/docs/rules/no-console
     "no-debugger": 1,                // http://eslint.org/docs/rules/no-debugger
     "no-alert": 1,                   // http://eslint.org/docs/rules/no-alert
     "no-constant-condition": 1,      // http://eslint.org/docs/rules/no-constant-condition
@@ -178,7 +178,7 @@
     "react/jsx-uses-vars": 1,
     "react/no-did-mount-set-state": [2, "allow-in-func"],
     "react/no-did-update-set-state": 2,
-    "react/no-multi-comp": 2,
+    "react/no-multi-comp": 0,
     "react/no-unknown-property": 2,
     "react/prop-types": 2,
     "react/react-in-jsx-scope": 2,

@@ -1,7 +1,7 @@
 {
-  "name": "webpack-react-redux",
+  "name": "simple-dropbox-clone",
   "version": "1.0.0",
-  "description": "A boilerplate for playing around with react, redux and react-router with the help of webpack.",
+  "description": "A simple Client side dropbox clone.",
   "main": "index.js",
   "scripts": {
     "test": "",
@@ -12,9 +12,14 @@
   "keywords": [
     "es6",
     "react",
-    "redux"
+    "redux",
+    "react router",
+    "dropbox clone",
+    "client side",
+    "single page application"
   ],
-  "author": "Jean-Pierre Sierens",
+  "author": "Aseem",
+  "parent-repo": "https://github.com/jpsierens/webpack-react-redux.git",
   "license": "MIT",
   "dependencies": {
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
