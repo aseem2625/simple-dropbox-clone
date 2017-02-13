@@ -35,5 +35,6 @@ https://github.com/jpsierens/webpack-react-redux.git
 0. Add folder, remove folder
 0. Currently support is being added for folder creation. Although, file uploading is on the way.
 0. Add middleware to make promise call to apis and attach to store actions
-0. On demand module reloading
+0. On demand module loading
 0. Code splitting
+0. Add offline functionality / Service worker[pretty good example since it also has an app shell]
