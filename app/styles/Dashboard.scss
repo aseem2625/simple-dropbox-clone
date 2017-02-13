@@ -1,0 +1,73 @@
+.dashboardContainer {
+	min-width: 600px;
+	max-width: 850px;
+	padding: 20px;
+	margin: 0 auto;
+
+	.directoryHeader {
+		margin-bottom: 50px;
+		display: table;
+
+		.directoryBreadCrumbs {
+			display: table-cell;
+			vertical-align: middle;
+
+			&Item {
+				cursor: pointer;
+				font-weight: 500;
+
+				&:nth-child(n+2) {
+					margin-left: 10px;
+
+					&::before {
+						content: '>';
+						margin-right: 10px;
+						color: #8d8d8d;
+					}
+				}
+			}
+		}
+		.dashboardControls {
+			width: 100%;
+			display: table-cell;
+			vertical-align: middle;
+			text-align: right;
+
+			&Btn {
+				font-size: 18px;
+				padding: 7px;
+				margin-left: 15px;
+				cursor: pointer;
+
+				&TypeA {
+					color: #37c521;
+				}
+				&TypeB {
+					color: #f17629;
+				}
+			}
+
+		}
+	}
+	.dashboardListContainer {
+		//border: 1px solid #bdbdbd;
+
+		.dashboardList {
+			padding-left: 0;
+			margin: 0;
+			list-style: none;
+
+			&Msg {
+				padding: 20px;
+				text-align: center;
+
+				.icon {
+					padding: 5px 10px;
+					font-size: 28px;
+					vertical-align: middle;
+					color: #1c8fe6;
+				}
+			}
+		}
+	}
+}
