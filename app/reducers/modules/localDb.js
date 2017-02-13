@@ -89,10 +89,12 @@ const localDB = (() => {
     const _returnDetailsIfUrlCorrect = (url) => {
         let lastSplatDetails = null;
 
-        if (url.length === 1) {
+        if (url.length === 1 && url[0] === 'home') {
             lastSplatDetails = _getItemDetailsById(0);
         } else {
+            // console.log(url);
             url.every((itemName) => {
+                if (itemName === 'home') {return false;}
                 const curSplatDetails = _getItemDetailsByName(itemName);
                 if (!curSplatDetails) {
                     return false;
@@ -106,6 +108,9 @@ const localDB = (() => {
                 return true;
             });
 
+            if (!lastSplatDetails) {
+                return null;
+            }
             /* Get name of children items */
             for (const childKey in lastSplatDetails.children) {
                 if (lastSplatDetails.children.hasOwnProperty(childKey)) {
@@ -140,6 +145,9 @@ const localDB = (() => {
                 itemReq = itemCollection[itemKey];
                 break;
             }
+        }
+        if (!itemReq) {
+            return null;
         }
 
         /* Get name of children items */
@@ -181,7 +189,11 @@ const localDB = (() => {
             const data = {};
             data.path = _getPathAncestors(itemId);
 
-            data.itemDetails = _getItemDetailsById(itemId);
+            const itemDetails = _getItemDetailsById(itemId);
+            if (!itemDetails) {
+                return {success: false, reason: 'Invalid Folder Requested' };
+            }
+            data.itemDetails = itemDetails;
 
             const response = {
                 success: true,
@@ -197,7 +209,11 @@ const localDB = (() => {
             }
 
             const data = {};
-            data.itemDetails = _returnDetailsIfUrlCorrect(url);
+            const itemDetails = _returnDetailsIfUrlCorrect(url);
+            if (!itemDetails) {
+                return {success: false, reason: 'Invalid Url Requested' };
+            }
+            data.itemDetails = itemDetails;
             data.path = _getPathAncestors(data.itemDetails.id);
 
             const response = {

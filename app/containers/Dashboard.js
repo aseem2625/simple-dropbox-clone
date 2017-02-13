@@ -28,8 +28,7 @@ export default class Dashboard extends Component {
 
 
         pushState: PropTypes.func.isRequired,
-        location: PropTypes.object,
-        params: PropTypes.object
+        location: PropTypes.object
     }
 
     constructor(props, context) {
@@ -43,14 +42,8 @@ export default class Dashboard extends Component {
     componentDidMount() {
         // Dispatch a call on the basis of URL..
         let url = '/';
-        const splats = this.props.params.splat;
-        if (splats) {
-            url = splats;
-            console.log('SPLATS...', url);
-        } else {
-            url = this.props.location.pathname.slice(1).split('/');
-            console.log('LOCATION...', url);
-        }
+        url = this.props.location.pathname.slice(1).split('/');
+        console.log('LOCATION...', url);
         this.props.getItemsByUrl(url);
     }
 
