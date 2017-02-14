@@ -20,7 +20,8 @@ const dashboard = (state = initialState, action) => {
         case FETCH_ITEM:
             return {
                 ...state,
-                result: action.result
+                result: action.result.success ? action.result.data : null,
+                success: action.result.success
             };
         default:
             return state;

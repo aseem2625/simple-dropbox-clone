@@ -12,7 +12,8 @@ import styles from '../styles/Dashboard.scss';
 @connect(
     state => ({
         filter: state.dashboard.filter,
-        result: state.dashboard.result
+        result: state.dashboard.result,
+        success: state.dashboard.success
     }),
     dispatch => bindActionCreators({onFilter: filterTable, getItemsByUrl, pushState: push}, dispatch)
 )
@@ -24,35 +25,85 @@ export default class Dashboard extends Component {
         getItemsByUrl: PropTypes.func,
 
         result: PropTypes.object,
+        success: PropTypes.bool,
         currentDirectory: PropTypes.array, // will be replaced by result object
 
 
         pushState: PropTypes.func.isRequired,
-        location: PropTypes.object
+        location: PropTypes.object,
+        params: PropTypes.object
+    }
+
+    static defaultProps = {
+        result: {
+            itemDetails: {
+                id: 0,
+                children:[
+                    {
+                        id: 2323,
+                        name: "myFolder",
+                        type: "folder"
+                    },
+                    {
+                        id: 1923,
+                        name: "Documents",
+                        type: "folder"
+                    }
+                ]
+            },
+            path: []
+        },
+        success: true
     }
 
     constructor(props, context) {
         super(props, context);
 
         this.state = {selectedItems: {}};
+        this.fetchDataForPath = this.fetchDataForPath.bind(this);
+
         this.selectItem = this.selectItem.bind(this);
         this.createBreadCrumbs = this.createBreadCrumbs.bind(this);
+        this.handleAddNew = this.handleAddNew.bind(this);
+        this.handleDelete = this.handleDelete.bind(this);
     }
 
-    componentDidMount() {
-        // Dispatch a call on the basis of URL..
+    fetchDataForPath() {
         let url = '/';
-        url = this.props.location.pathname.slice(1).split('/');
-        console.log('LOCATION...', url);
+        if (this.props.params.splat) {
+            url = this.props.params.splat.split('/');
+            // console.log('PARAMS...', url);
+            // console.log(url);
+        } else {
+            url = this.props.location.pathname.slice(1).split('/');
+            console.log('LOCATION...', url);
+        }
+        if (url[url.length -1] === "") {
+            url.pop();
+        }
         this.props.getItemsByUrl(url);
     }
 
+    componentDidMount() {
+        // console.log(".......CHECK.......");
+        this.fetchDataForPath();
+        // Dispatch a call on the basis of URL..
+    }
+    componentDidUpdate(prevProps) {
+        if (prevProps.location.pathname !== this.props.location.pathname) {
+            this.fetchDataForPath();
+        }
+    }
+
     componentWillReceiveProps(nextProps) {
-        console.log(nextProps.result);
-        if(!nextProps.result.success) {
+        if(!nextProps.success) {
             // If there is mismatch in reques then redirect
-            console.log(nextProps.result.reason);
-            this.props.pushState('/');
+            // console.log(this.props.pushState);
+            // this.props.pushState('/');
+            window.location = '/';
+        } else {
+            // console.log(nextProps.result.itemDetails);
+            // console.log(nextProps.result.path);
         }
     }
 
@@ -70,28 +121,33 @@ export default class Dashboard extends Component {
     handleAddNew() {
         // dispatch api call
         // add in frontend on success response
+        console.log('Adding new folder');
     }
 
     /* delete selected items */
     handleDelete() {
         // dispatch api call
         // remove from frontend on success response
+        console.log('Deleting selected folder', this.state.selectedItems);
     }
 
     createBreadCrumbs() {
         const breadCrumbs = [];
-        if (!this.props.result || !this.props.result.path) {
-            return (
-                <Link className={styles.directoryBreadCrumbsItem}>Home</Link>
+        breadCrumbs.push(
+            <Link key="home" className={styles.directoryBreadCrumbsItem}>Home</Link>
+        );
+
+        if (this.props.result) {
+            // item are the ancestors in sequence
+            this.props.result.path.forEach((item, ind)=>{
+                breadCrumbs.push(
+                    <Link to="/" key={ind} className={styles.directoryBreadCrumbsItem}>{item.name}</Link>
+                );
+            });
+            breadCrumbs.push(
+                <Link key="currentPath" className={styles.directoryBreadCrumbsItem}>{this.props.result.itemDetails.name}</Link>
             );
         }
-
-        // item are the ancestors in sequence
-        this.props.result.path.forEach((item, ind)=>{
-            breadCrumbs.push(
-                <Link key={ind} className={styles.directoryBreadCrumbsItem}>{item.name}</Link>
-            );
-        });
 
         return breadCrumbs;
     }
@@ -104,6 +160,7 @@ export default class Dashboard extends Component {
         const breadCrumbs = this.createBreadCrumbs();
 
         // console.log(splitPath);
+        // console.log("RESULT IN RENDER..", this.props.result);
 
         // currentDirectory per item id can be stored using indexDB through store so that network calls are not made again.
 
@@ -123,7 +180,7 @@ export default class Dashboard extends Component {
                     </div>
                 </div>
                 <div className={styles.dashboardListContainer}>
-                    <DashboardDirectory directory={this.props.currentDirectory}
+                    <DashboardDirectory directory={this.props.result ? this.props.result.itemDetails : null}
                                         selectedItems={this.state.selectedItems}
                                         selectItem={this.selectItem}
                                         currentUrl={currentUrl} />
@@ -136,30 +193,10 @@ export default class Dashboard extends Component {
     }
 }
 
-Dashboard.defaultProps = {
-    currentDirectory: [
-        {
-            id: 13233,
-            type: 'folder',
-            name: 'my Folder',
-        },
-        {
-            id: 4545,
-            type: 'folder',
-            name: 'PublicFolder',
-        },
-        {
-            id: 23332,
-            type: 'file',
-            name: 'Random folder'
-        }
-    ]
-};
-
 const DashboardDirectory = (props) => {
     const directoryItems = [];
 
-    if (!props.directory || !props.directory.length) {
+    if (!props.directory || !props.directory.children.length) {
         return (
             <div className={styles.dashboardListMsg}>
                 <i className={`glyphicon glyphicon-cloud ${styles.icon}`}/>Start adding items on Cloud!
@@ -167,13 +204,13 @@ const DashboardDirectory = (props) => {
         );
     }
 
-    props.directory.forEach((item, ind)=>{
+    props.directory.children.forEach((item, ind)=>{
         directoryItems.push(
             <FileItemRow key={ind}
                          itemDetails={item}
                          isSelected={props.selectedItems[item.id]}
                          selectItem={props.selectItem}
-                         currentUrl={props.currentUrl}/>
+                         currentUrl={props.currentUrl} />
         );
     });
 
@@ -188,7 +225,7 @@ const DashboardDirectory = (props) => {
 };
 
 DashboardDirectory.propTypes = {
-    directory: PropTypes.array,
+    directory: PropTypes.object,
     selectedItems: PropTypes.object,
     selectItem: PropTypes.func.isRequired,
     currentUrl: PropTypes.string
