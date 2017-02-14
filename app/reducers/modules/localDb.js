@@ -1,5 +1,9 @@
 import _ from 'lodash';
 
+const log = function(params) {
+    console.log('API....', params);
+};
+
 const localDB = (() => {
     /*
      -> Each id is item. And each item is comes in url path in frontend. Maintaining 1 level hierarchy in DB is important.
@@ -9,8 +13,8 @@ const localDB = (() => {
      */
     const itemCollection = [
         {
-            id: 0, // 0 means root 0 level children
-            parent: 0, // 0 means it's at 0 level
+            id: 0, // 0 = it's container of 0 level parents
+            parent: 0, // 0  = it's at 0 level
             children: [
                 {id: 2323, type: 'folder'}
             ]
@@ -21,41 +25,46 @@ const localDB = (() => {
             name: 'myFolder',
             parent: 0, // 0 means it's at 0 level
             children: [
-                {id: 12323, type: 'folder'},
-                {id: 3423, type: 'file'},
+                {id: 13323, type: 'folder'},
                 {id: 23283, type: 'folder'},
-                {id: 1332, type: 'file'}
             ]
         },
         {
-            id: 26283,
+            id: 13323,
             type: 'folder',
             name: 'DummyFolder',
             parent: 2323,
             children: [
-                {id: 122323, type: 'folder'},
-                {id: 13534, type: 'file'},
-                {id: 226, type: 'file'},
-                {id: 221, type: 'folder'}
+                {id: 1893, type: 'file'},
             ]
         },
         {
             id: 23283,
             type: 'folder',
             name: 'Public Folder',
-            parent: 26283,
+            parent: 2323,
             children: [
-                {id: 122323, type: 'folder'},
-                {id: 13534, type: 'file'},
-                {id: 226, type: 'file'},
-                {id: 221, type: 'folder'}
+                {id: 1923, type: 'folder'}
             ]
+        },
+        {
+            id: 1923,
+            type: 'folder',
+            name: 'Documents',
+            parent: 23283, // 0 means it's at 0 level
+            //children = no key bcoz in mongo, we'll keep no key for empty children
         },
         {
             id: 13534,
             type: 'file',
             parent: 23283,
             name: 'somefile.js',
+        },
+        {
+            id: 1893,
+            type: 'file',
+            parent: 13323,
+            name: 'goodfile.js',
         },
     ];
 
@@ -69,15 +78,16 @@ const localDB = (() => {
     const userCollection = {
         0: {ancestors: null},
         2323: {ancestors: []},
-        26283: {ancestors: [2323]},
-        23283: {ancestors: [2323, 26283]}
+        13323: {ancestors: [2323]},
+        1923: {ancestors: [2323, 23283]},
+        23283: {ancestors: [2323]}
     };
 
     /* Parse itemCollection with name */
     const _getItemDetailsByName = (itemName) => {
         for (const itemKey in itemCollection) {
             if (itemCollection.hasOwnProperty(itemKey)) {
-                if (itemCollection[itemKey].itemName === itemName) {
+                if (itemCollection[itemKey].name === itemName) {
                     return itemCollection[itemKey];
                 }
             }
@@ -92,9 +102,8 @@ const localDB = (() => {
         if (url.length === 1 && url[0] === 'home') {
             lastSplatDetails = _getItemDetailsById(0);
         } else {
-            // console.log(url);
             url.every((itemName) => {
-                if (itemName === 'home') {return false;}
+                if (itemName === 'home') {return true;}
                 const curSplatDetails = _getItemDetailsByName(itemName);
                 if (!curSplatDetails) {
                     return false;
@@ -196,8 +205,8 @@ const localDB = (() => {
             data.itemDetails = itemDetails;
 
             const response = {
-                success: true,
-                result: data
+                data,
+                success: true
             };
             return response; // (Add promise later to simulate backend)
         },
@@ -217,8 +226,8 @@ const localDB = (() => {
             data.path = _getPathAncestors(data.itemDetails.id);
 
             const response = {
-                success: true,
-                result: data
+                data,
+                success: true
             };
             return response; // (Add promise later to simulate backend)
         }
