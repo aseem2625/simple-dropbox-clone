@@ -231,6 +231,83 @@ const localDB = (() => {
                 success: true
             };
             return response; // (Add promise later to simulate backend)
+        },
+
+        deleteItemsById: (items) => {
+            log(items);
+
+            if (!items.length) {
+                return {success: false, reason: 'No item sent to delete' };
+            }
+
+            let success = true;
+            const data = {};
+
+            try {
+                items.forEach((id, ind) => {
+
+                    const itemId = parseInt(id, 10);
+
+                    // folders will exist in ancestors otherwise not
+                    const itemOverview = userCollection[itemId];
+                    let parentId = null;
+                    if(itemOverview.ancestors && itemOverview.ancestors.length) {
+                        parentId = itemOverview.ancestors[itemOverview.ancestors.length - 1];
+                    }
+
+                    // Remove from ancestor hierarchy
+                    delete userCollection[itemId];
+
+                    // Remove from parent's children list if parent exists
+                    if (parentId) {
+                        itemCollection.every((item, ind) => {
+                            let isDeleted = false;
+                            if (item.id === parentId) {
+                                item.children.every((child, ind) => {
+                                    if (child.id == itemId) {
+                                        delete item.children[ind];
+                                        isDeleted = true;
+                                        return !isDeleted;
+                                    }
+                                    return !isDeleted;
+                                });
+                            }
+                            return !isDeleted;
+                        });
+                    }
+
+                    // Remove all children
+                    itemCollection.every((item, ind) => {
+                        let isChildrenDelete = false;
+
+                        if (item.id === itemId) {
+                            item.children.forEach((child) => {
+                                delete itemCollection[child.id];
+                            });
+                            isChildrenDelete = true;
+                        }
+                        return !isChildrenDelete;
+                    });
+
+
+                    if (parentId) {
+                        const itemDetails = _getItemDetailsById(parentId);
+                        data.itemDetails = itemDetails;
+                        data.path = _getPathAncestors(parentId);
+                    }
+
+                });
+            } catch(e) {
+                log('ERROR: Deletion failed ' + e);
+                success = false;
+            }
+
+            const response = {
+                data,
+                success
+            };
+
+            return response; // (Add promise later to simulate backend)
         }
     };
 })();

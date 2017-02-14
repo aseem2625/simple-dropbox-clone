@@ -20,6 +20,13 @@ export default class FileItemRow extends Component {
         const itemContainerClass = this.props.isSelected ? styles.fileItemContainer + ' ' + styles.selected : styles.fileItemContainer;
         // console.log(this.props);
 
+        let link = "/";
+        if (this.props.itemDetails.type === 'file') {
+            link = `${this.props.currentUrl}?file=${this.props.itemDetails.name}`;
+        } else {
+            link = `${this.props.currentUrl}/${this.props.itemDetails.name}`;
+        }
+
         return (
             <li className={itemContainerClass}
                 onClick={()=> this.props.selectItem(this.props.itemDetails.id)}>
@@ -29,7 +36,7 @@ export default class FileItemRow extends Component {
                             <i className={`glyphicon glyphicon-folder-close ${styles.itemIcon}`}/> :
                             <i className={`glyphicon glyphicon-file ${styles.itemIcon}`}/>
                     }
-                    <Link to={`${this.props.currentUrl}/${this.props.itemDetails.name}`} onClick={(e)=>e.stopPropagation()}>
+                    <Link to={link} onClick={(e)=>e.stopPropagation()}>
                         <span className={styles.itemLabel}>{this.props.itemDetails.name}</span>
                     </Link>
                 </div>

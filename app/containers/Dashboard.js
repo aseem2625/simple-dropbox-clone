@@ -4,7 +4,7 @@ import Link from 'react-router/lib/Link';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 
-import { filterTable, getItemsByUrl } from '../reducers/modules/dashboard';
+import { filterTable, getItemsByUrl, deleteItemsById } from '../reducers/modules/dashboard';
 import FileItemRow from '../components/FileRowItem/FileItemRow';
 import styles from '../styles/Dashboard.scss';
 
@@ -15,7 +15,7 @@ import styles from '../styles/Dashboard.scss';
         result: state.dashboard.result,
         success: state.dashboard.success
     }),
-    dispatch => bindActionCreators({onFilter: filterTable, getItemsByUrl, pushState: push}, dispatch)
+    dispatch => bindActionCreators({onFilter: filterTable, getItemsByUrl, deleteItemsById, pushState: push}, dispatch)
 )
 
 export default class Dashboard extends Component {
@@ -23,10 +23,10 @@ export default class Dashboard extends Component {
         filter: PropTypes.string,
         onFilter: PropTypes.func,
         getItemsByUrl: PropTypes.func,
+        deleteItemsById: PropTypes.func,
 
         result: PropTypes.object,
         success: PropTypes.bool,
-        currentDirectory: PropTypes.array, // will be replaced by result object
 
 
         pushState: PropTypes.func.isRequired,
@@ -99,11 +99,11 @@ export default class Dashboard extends Component {
         if(!nextProps.success) {
             // If there is mismatch in reques then redirect
             // console.log(this.props.pushState);
-            // this.props.pushState('/');
-            window.location = '/';
+            this.props.pushState('/');
+            // window.location = '/';
         } else {
             // console.log(nextProps.result.itemDetails);
-            // console.log(nextProps.result.path);
+            // console.log(nextProps.result);
         }
     }
 
@@ -129,6 +129,12 @@ export default class Dashboard extends Component {
         // dispatch api call
         // remove from frontend on success response
         console.log('Deleting selected folder', this.state.selectedItems);
+        if (!Object.keys(this.state.selectedItems).length) {
+            return;
+        }
+        this.props.deleteItemsById(Object.keys(this.state.selectedItems));
+        this.setState({selectedItems: {}}); // Ideally it should be done in .then() part of dispatch if it's a promise
+
     }
 
     createBreadCrumbs() {
@@ -137,7 +143,7 @@ export default class Dashboard extends Component {
             <Link key="home" className={styles.directoryBreadCrumbsItem}>Home</Link>
         );
 
-        if (this.props.result) {
+        if (this.props.result && this.props.result.path) {
             // item are the ancestors in sequence
             this.props.result.path.forEach((item, ind)=>{
                 breadCrumbs.push(
@@ -196,10 +202,10 @@ export default class Dashboard extends Component {
 const DashboardDirectory = (props) => {
     const directoryItems = [];
 
-    if (!props.directory || !props.directory.children.length) {
+    if (!props.directory || !props.directory.children || !props.directory.children.length || !Object.keys(props.directory.children).length) {
         return (
             <div className={styles.dashboardListMsg}>
-                <i className={`glyphicon glyphicon-cloud ${styles.icon}`}/>Start adding items on Cloud!
+                <i className={`glyphicon glyphicon-cloud ${styles.icon}`}/>Empty folder. Add something!
             </div>
         );
     }
