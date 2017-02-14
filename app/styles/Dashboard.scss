@@ -5,8 +5,10 @@
 	margin: 0 auto;
 
 	.directoryHeader {
+		width: 100%;
 		margin-bottom: 50px;
 		display: table;
+		table-layout: fixed;
 
 		.directoryBreadCrumbs {
 			display: table-cell;
@@ -28,10 +30,10 @@
 			}
 		}
 		.dashboardControls {
-			width: 100%;
 			display: table-cell;
 			vertical-align: middle;
 			text-align: right;
+			width: 100px;
 
 			&Btn {
 				font-size: 18px;
@@ -58,6 +60,7 @@
 			list-style: none;
 
 			&Msg {
+				border: 1px solid #bdbdbd;
 				padding: 20px;
 				text-align: center;
 
