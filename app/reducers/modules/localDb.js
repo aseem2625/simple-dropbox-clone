@@ -106,6 +106,7 @@ const localDB = (() => {
                 if (itemName === 'home') {return true;}
                 const curSplatDetails = _getItemDetailsByName(itemName);
                 if (!curSplatDetails) {
+                    lastSplatDetails = null;
                     return false;
                 }
                 if (lastSplatDetails) {
