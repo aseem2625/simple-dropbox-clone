@@ -32,8 +32,9 @@ https://github.com/jpsierens/webpack-react-redux.git
 
 ## TODO:
 0. Auto rename common item name to (1) (2), etc..
-0. Naming of new folder and Renaming of existing items
+0. Resolve path bug in response when Renaming of existing items
 0. Add navigation in create bread crumbs
+
 0. Heavy testing addition of folder -> url should match and browser history should match.
 0. Add pop ups based on user actions
 0. Url appending when clicked on folder be based on path provided from backend
