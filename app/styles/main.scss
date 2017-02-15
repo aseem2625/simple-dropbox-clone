@@ -3,13 +3,15 @@
 }
 
 .appHeader {
-	padding: 18px;
+	width: 100%;
+	padding: 16px;
 	display: table;
+	background-color: #2593e6;
 
 	&Title {
 		font-size: 22px;
-		color: #2fa3fb;
 		display: table-cell;
+		color: #fff;
 	}
 }
 
