@@ -4,10 +4,11 @@ import Link from 'react-router/lib/Link';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 
-import { filterTable, getItemsByUrl, deleteItemsById, addNewItem } from '../reducers/modules/dashboard';
+import { filterTable, getItemsByUrl, deleteItemsById, addNewItem, renameItem } from '../reducers/modules/dashboard';
 import FileItemRow from '../components/FileRowItem/FileItemRow';
 import styles from '../styles/Dashboard.scss';
 
+import Modal from '../components/Library/Modal';
 
 @connect(
     state => ({
@@ -15,7 +16,7 @@ import styles from '../styles/Dashboard.scss';
         result: state.dashboard.result,
         success: state.dashboard.success
     }),
-    dispatch => bindActionCreators({onFilter: filterTable, getItemsByUrl, deleteItemsById, addNewItem, pushState: push}, dispatch)
+    dispatch => bindActionCreators({onFilter: filterTable, getItemsByUrl, deleteItemsById, addNewItem, renameItem, pushState: push}, dispatch)
 )
 
 export default class Dashboard extends Component {
@@ -25,6 +26,7 @@ export default class Dashboard extends Component {
         getItemsByUrl: PropTypes.func,
         deleteItemsById: PropTypes.func,
         addNewItem: PropTypes.func,
+        renameItem: PropTypes.func,
 
         result: PropTypes.object,
         success: PropTypes.bool,
@@ -65,8 +67,10 @@ export default class Dashboard extends Component {
 
         this.selectItem = this.selectItem.bind(this);
         this.createBreadCrumbs = this.createBreadCrumbs.bind(this);
+        this.handleRenameItem = this.handleRenameItem.bind(this);
         this.handleAddNewItem = this.handleAddNewItem.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
+        this.closePopUp = this.closePopUp.bind(this);
     }
 
     fetchDataForPath() {
@@ -118,12 +122,25 @@ export default class Dashboard extends Component {
         this.setState({selectedItems: newSelectedItems});
     }
 
+
+    closePopUp() {
+        this.setState({
+            isPopUpOpenOfType: false
+        });
+    }
+
     /* makes a dummy item of type:folder */
-    handleAddNewItem() {
-        // dispatch api call
-        // add in frontend on success response
+    handleRenameItem(newName) {
         console.log('Adding new folder');
-        this.props.addNewItem(this.props.result.itemDetails.id, 'New Folder');
+        const selectedItemId = Object.keys(this.state.selectedItems)[0];
+        this.props.renameItem(selectedItemId, newName);
+        this.setState({selectedItems: {}}); // Ideally it should be done in .then() part of dispatch if it's a promise
+    }
+
+    /* makes a dummy item of type:folder */
+    handleAddNewItem(newFolderName) {
+        console.log('Adding new folder');
+        this.props.addNewItem(this.props.result.itemDetails.id, newFolderName);
     }
 
     /* delete selected items */
@@ -172,6 +189,32 @@ export default class Dashboard extends Component {
 
         // currentDirectory per item id can be stored using indexDB through store so that network calls are not made again.
 
+
+        let pageModal = null;
+
+        if (this.state.isPopUpOpenOfType) {
+            let handler;
+            let message;
+            if (this.state.isPopUpOpenOfType === 'rename') {
+                handler = this.handleRenameItem;
+                message = 'Rename the selected folder!';
+            } else if (this.state.isPopUpOpenOfType === 'new_folder'){
+                handler = this.handleAddNewItem;
+                message = 'Name newly added folder!';
+            }
+            const modalContent = (
+                <PagePopUpContent handler={handler}
+                                  closePopUp={this.closePopUp}
+                                  message={message}/>
+            );
+
+            pageModal = (
+                <Modal closePopUp={this.closePopUp}
+                       title=""
+                       content={modalContent}/>
+            );
+        }
+
         return (
             <div className={styles.dashboardContainer}>
                 <div className={styles.directoryHeader}>
@@ -179,10 +222,26 @@ export default class Dashboard extends Component {
                         {breadCrumbs}
                     </div>
                     <div className={styles.dashboardControls}>
-                        <span className={`glyphicon glyphicon-plus-sign ${styles.dashboardControlsBtn} ${styles.dashboardControlsBtnTypeA}`}
-                              onClick={this.handleAddNewItem}
+                        {
+                            Object.keys(this.state.selectedItems).length === 1 ? (
+                                <span className={`glyphicon glyphicon-asterisk ${styles.dashboardControlsBtn} ${styles.dashboardControlsBtnTypeA}`}
+                                      onClick={()=>{
+                                          console.log("SELECTED ITEMS..", this.state.selectedItems);
+                                          this.setState({
+                                            isPopUpOpenOfType: 'rename'
+                                          });
+                                      }}
+                                      title="Rename folder"/>
+                            ) : null
+                        }
+                        <span className={`glyphicon glyphicon-plus-sign ${styles.dashboardControlsBtn} ${styles.dashboardControlsBtnTypeB}`}
+                              onClick={()=>{
+                                  this.setState({
+                                      isPopUpOpenOfType: 'new_folder'
+                                  });
+                              }}
                               title="New folder"/>
-                        <span className={`glyphicon glyphicon-trash ${styles.dashboardControlsBtn} ${styles.dashboardControlsBtnTypeB}`}
+                        <span className={`glyphicon glyphicon-trash ${styles.dashboardControlsBtn} ${styles.dashboardControlsBtnTypeC}`}
                               onClick={this.handleDelete}
                               title="Remove Selected Item"/>
                     </div>
@@ -193,14 +252,59 @@ export default class Dashboard extends Component {
                                         selectItem={this.selectItem}
                                         currentUrl={currentUrl} />
                 </div>
-                {/*
-                <ProductTable filter={this.props.filter} />
-                */}
+                {pageModal}
             </div>
         );
     }
 }
 
+/* Pop Up */
+class PagePopUpContent extends Component {
+    static propTypes = {
+        handler: PropTypes.func.isRequired,
+        message: PropTypes.string,
+        closePopUp: PropTypes.func.isRequired,
+    }
+
+    constructor(props, context) {
+        super(props, context);
+
+        this.state = {fieldVal: ''};
+    }
+
+    render() {
+        if (this.tabConvId) {
+            console.log('RENDER..tab Index..', this.tabConvId);
+        }
+        return (
+            <div className={styles.pageModal}>
+                <div className={styles.description}>{this.props.message}</div>
+                <input type="text"
+                       className={styles.field}
+                       onChange={()=>this.setState({
+                           fieldVal: this.refs.fieldVal.value
+                       })}
+                       ref="fieldVal"
+                       value={this.state.fieldVal}/>
+                {
+                    this.state.fieldVal ? (
+                        <span className={styles.actionBtn}
+                              onClick= {()=>{
+                                  if (this.refs.fieldVal.value) {
+                                      this.props.closePopUp();
+                                      this.props.handler(this.state.fieldVal);
+                                  }
+                              }}>UPDATE
+                        </span>
+                    ) : null
+                }
+            </div>
+        );
+    }
+}
+
+
+/* Dashboard Diretory */
 const DashboardDirectory = (props) => {
     const directoryItems = [];
 

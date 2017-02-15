@@ -3,7 +3,7 @@ import localDB from './localDb';
 // ACTIONS
 const FILTER = 'FILTER';
 const FETCH_ITEM = 'FETCH_ITEM';
-const DELETE_ITEMS = 'DELETE_ITEMS';
+const USER_ACTION = 'USER_ACTION';
 
 
 // REDUCER
@@ -25,7 +25,7 @@ const dashboard = (state = initialState, action) => {
                 success: action.result.success
             };
 
-        case DELETE_ITEMS:
+        case USER_ACTION:
             return {
                 ...state,
                 result: action.result.success ? action.result.data : null,
@@ -64,7 +64,7 @@ export function deleteItemsById(items) {
     console.log(result);
 
     return {
-        type: DELETE_ITEMS,
+        type: USER_ACTION,
         result
     };
 }
@@ -76,7 +76,19 @@ export function addNewItem(parentId, itemName) {
     console.log(result);
 
     return {
-        type: DELETE_ITEMS,
+        type: USER_ACTION,
+        result
+    };
+}
+
+export function renameItem(parentId, itemName) {
+    // add middleware later to support mapping with promise and actions
+    const result = localDB.renameFileById(parentId, itemName);
+    console.log('............RESULT RENAME.............');
+    console.log(result);
+
+    return {
+        type: USER_ACTION,
         result
     };
 }
