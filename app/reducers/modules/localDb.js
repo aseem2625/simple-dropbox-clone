@@ -219,7 +219,7 @@ const localDB = (() => {
                 data,
                 success: true
             };
-            return response; // (Add promise later to simulate backend)
+            return response;
         },
 
         getItemByUrl: (url) => {
@@ -378,6 +378,42 @@ const localDB = (() => {
 
             return response;
         },
+
+        renameFileById: function(itemId, newName) {
+            if (!itemId || !newName) {
+                return { success: false, Reason: 'Invalid item or incorrect new file name'};
+            }
+            const data = {};
+            let success = false;
+            //Parse itemCollection and rename if found
+            itemCollection.every((item)=>{
+                    if (item.id == itemId ) {
+                        item.name = newName;
+                        success = true;
+                        return false;
+                    }
+                    return true;
+            });
+
+            console.log("ITEMS....COLECTION...");
+
+            console.log(itemId);
+            // Prepare response
+            const parentId  = userCollection[itemId].ancestors[0];
+            const itemDetails = _getItemDetailsById(parentId);
+            data.itemDetails = itemDetails;
+
+            data.path = _getPathAncestors(itemId);
+            console.log(itemDetails);
+
+
+            const response = {
+                success,
+                data
+            };
+
+            return response;
+        }
     };
 })();
 
