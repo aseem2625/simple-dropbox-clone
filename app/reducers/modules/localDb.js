@@ -1,7 +1,8 @@
 import _ from 'lodash';
 
-const log = function(params) {
-    console.log('API....', params);
+const randomGenerator = function () {
+    var rnd = Math.floor(Math.random() * 90000) + 10000;
+    return rnd;
 };
 
 const localDB = (() => {
@@ -16,7 +17,8 @@ const localDB = (() => {
             id: 0, // 0 = it's container of 0 level parents
             parent: 0, // 0  = it's at 0 level
             children: [
-                {id: 2323, type: 'folder'}
+                {id: 2323, type: 'folder'},
+                {id: 9323, type: 'folder'}
             ]
         },
         {
@@ -28,6 +30,12 @@ const localDB = (() => {
                 {id: 13323, type: 'folder'},
                 {id: 23283, type: 'folder'},
             ]
+        },
+        {
+            id: 9323,
+            type: 'folder',
+            name: 'new Folder',
+            parent: 0, // 0 means it's at 0 level
         },
         {
             id: 13323,
@@ -74,10 +82,12 @@ const localDB = (() => {
      -> In case of folder/file movement in hierarchy, ancestors part ahead of latest parent will be removed.
      -> Empty ancenstor array means top in hierarchy level.
      -> Parent ids in order of hierarchy to simplify DB parsing for finding path.
+     -> root is a non-tangible item but with id = 0
      */
     const userCollection = {
         0: {ancestors: null},
-        2323: {ancestors: []},
+        2323: {ancestors: [0]},
+        9323: {ancestors: [0]},
         13323: {ancestors: [2323]},
         1923: {ancestors: [2323, 23283]},
         23283: {ancestors: [2323]}
@@ -234,7 +244,7 @@ const localDB = (() => {
         },
 
         deleteItemsById: (items) => {
-            log(items);
+            console.log(items);
 
             if (!items.length) {
                 return {success: false, reason: 'No item sent to delete' };
@@ -248,7 +258,7 @@ const localDB = (() => {
 
                     const itemId = parseInt(id, 10);
 
-                    // folders will exist in ancestors otherwise not
+                    // 1. folders will exist in ancestors otherwise not
                     const itemOverview = userCollection[itemId];
                     let parentId = null;
                     if(itemOverview.ancestors && itemOverview.ancestors.length) {
@@ -258,8 +268,8 @@ const localDB = (() => {
                     // Remove from ancestor hierarchy
                     delete userCollection[itemId];
 
-                    // Remove from parent's children list if parent exists
-                    if (parentId) {
+                    // 2. Remove from parent's children list if parent exists
+                    if (parentId != null) {
                         itemCollection.every((item, ind) => {
                             let isDeleted = false;
                             if (item.id === parentId) {
@@ -276,21 +286,24 @@ const localDB = (() => {
                         });
                     }
 
-                    // Remove all children
+                    // 3. Remove all children
                     itemCollection.every((item, ind) => {
                         let isChildrenDelete = false;
 
                         if (item.id === itemId) {
-                            item.children.forEach((child) => {
-                                delete itemCollection[child.id];
-                            });
+                            if (item.children) {
+                                item.children.forEach((child) => {
+                                    delete itemCollection[child.id];
+                                });
+                            }
                             isChildrenDelete = true;
                         }
                         return !isChildrenDelete;
                     });
 
 
-                    if (parentId) {
+                    console.log("...Parent.. ID...", parentId);
+                    if (parentId != null) {
                         const itemDetails = _getItemDetailsById(parentId);
                         data.itemDetails = itemDetails;
                         data.path = _getPathAncestors(parentId);
@@ -298,7 +311,7 @@ const localDB = (() => {
 
                 });
             } catch(e) {
-                log('ERROR: Deletion failed ' + e);
+                console.log('ERROR: Deletion failed ' + e);
                 success = false;
             }
 
@@ -308,7 +321,63 @@ const localDB = (() => {
             };
 
             return response; // (Add promise later to simulate backend)
-        }
+        },
+
+        addNewItem: function(parentId, itemName) {
+            // Generate limited digit id based on user id and timestamp
+            const newItemId = randomGenerator();
+            const data = {};
+            let success = true;
+
+            try {
+                // 1. Add ancestor of this new id in userCollection by concatening existing ancestors of parentId
+                userCollection[newItemId] = {};
+                const ancstrsOfParent = userCollection[parentId].ancestors;
+                if (ancstrsOfParent) {
+                    userCollection[newItemId].ancestors = ancstrsOfParent.concat([parentId]);
+                } else {
+                    userCollection[newItemId].ancestors = [parentId];
+                }
+
+                // 2. Add new key in itemsCollection with no children key and type "folder"
+                const prepareItem = {
+                    id: newItemId,
+                    type: 'folder',
+                    name: itemName,
+                    parent: parentId
+                };
+                itemCollection.push(prepareItem);
+
+                // 3. Insert key in parent's children object
+                itemCollection.every((item)=>{
+                    if (item.id === parentId) {
+                        item.children.push(
+                            {id: newItemId, type: 'folder'},
+                        );
+                        return false;
+                    }
+                    return true;
+                });
+
+                // Prepare response
+                if (parentId != null) {
+                    const itemDetails = _getItemDetailsById(parentId);
+                    data.itemDetails = itemDetails;
+                    data.path = _getPathAncestors(parentId);
+                }
+
+            } catch(e) {
+                console.log('ERROR: Adding new item failed: ' + e);
+                success = false;
+            }
+
+            const response = {
+                data,
+                success
+            };
+
+            return response;
+        },
     };
 })();
 
