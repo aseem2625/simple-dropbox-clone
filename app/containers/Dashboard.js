@@ -4,7 +4,7 @@ import Link from 'react-router/lib/Link';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 
-import { filterTable, getItemsByUrl, deleteItemsById } from '../reducers/modules/dashboard';
+import { filterTable, getItemsByUrl, deleteItemsById, addNewItem } from '../reducers/modules/dashboard';
 import FileItemRow from '../components/FileRowItem/FileItemRow';
 import styles from '../styles/Dashboard.scss';
 
@@ -15,7 +15,7 @@ import styles from '../styles/Dashboard.scss';
         result: state.dashboard.result,
         success: state.dashboard.success
     }),
-    dispatch => bindActionCreators({onFilter: filterTable, getItemsByUrl, deleteItemsById, pushState: push}, dispatch)
+    dispatch => bindActionCreators({onFilter: filterTable, getItemsByUrl, deleteItemsById, addNewItem, pushState: push}, dispatch)
 )
 
 export default class Dashboard extends Component {
@@ -24,6 +24,7 @@ export default class Dashboard extends Component {
         onFilter: PropTypes.func,
         getItemsByUrl: PropTypes.func,
         deleteItemsById: PropTypes.func,
+        addNewItem: PropTypes.func,
 
         result: PropTypes.object,
         success: PropTypes.bool,
@@ -64,7 +65,7 @@ export default class Dashboard extends Component {
 
         this.selectItem = this.selectItem.bind(this);
         this.createBreadCrumbs = this.createBreadCrumbs.bind(this);
-        this.handleAddNew = this.handleAddNew.bind(this);
+        this.handleAddNewItem = this.handleAddNewItem.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
     }
 
@@ -118,10 +119,11 @@ export default class Dashboard extends Component {
     }
 
     /* makes a dummy item of type:folder */
-    handleAddNew() {
+    handleAddNewItem() {
         // dispatch api call
         // add in frontend on success response
         console.log('Adding new folder');
+        this.props.addNewItem(this.props.result.itemDetails.id, 'New Folder');
     }
 
     /* delete selected items */
@@ -178,7 +180,7 @@ export default class Dashboard extends Component {
                     </div>
                     <div className={styles.dashboardControls}>
                         <span className={`glyphicon glyphicon-plus-sign ${styles.dashboardControlsBtn} ${styles.dashboardControlsBtnTypeA}`}
-                              onClick={this.handleAddNew}
+                              onClick={this.handleAddNewItem}
                               title="New folder"/>
                         <span className={`glyphicon glyphicon-trash ${styles.dashboardControlsBtn} ${styles.dashboardControlsBtnTypeB}`}
                               onClick={this.handleDelete}

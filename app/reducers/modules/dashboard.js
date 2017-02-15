@@ -69,4 +69,16 @@ export function deleteItemsById(items) {
     };
 }
 
+export function addNewItem(parentId, itemName) {
+    // add middleware later to support mapping with promise and actions
+    const result = localDB.addNewItem(parentId, itemName);
+    console.log('............RESULT ADD.............');
+    console.log(result);
+
+    return {
+        type: DELETE_ITEMS,
+        result
+    };
+}
+
 export default dashboard;
