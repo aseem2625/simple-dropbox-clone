@@ -15,19 +15,45 @@ A simple yet beautiful project to build a single page application showing basic 
 * eslint to keep your js readable
 
 
-## Run the app
+## Run the app (Development)
 
 0. ```npm install```. (``yarn install`` also works fine)
 0. ```npm start```
 
-## Build the app
+## Build the app (Deployment)
 ```npm run build```
 
 This will build the app into the "dist" directory in the root of the project. It contains the index.html along with the minified assets, ready for production.
 
 
-## Cloned from:
+## Base Cloned from:
 https://github.com/jpsierens/webpack-react-redux.git
+
+## Basic feature added till now:
+0. Open localhost:3000, you'll see landing page
+<img src="/docs/screenshots/1.png" alt="Landing page" width="550">
+
+0. Select a folder by clicking anywhere on the row (except name of file, just like dropbox)
+<img src="/docs/screenshots/2.png" alt="Select folder for rename" width="550">
+
+0. For single selection, * button appears to rename file. Type some name
+<img src="/docs/screenshots/3.png" alt="Click the * button for rename" width="550">
+
+0. Now you can see that folder is renamed. Now, you can "click on folder name" to go inside that folder
+<img src="/docs/screenshots/4.png" alt="Folder with newly given name" width="550">
+
+0. Select multiple folder by clicking anywhere on the row (except name of file, just like dropbox)
+<img src="/docs/screenshots/7.png" alt="Select multiple folders" width="550">
+
+0. Click on delete button to delete all the selected folders
+<img src="/docs/screenshots/6.png" alt="Delete multiple folders" width="550">
+
+0. Click on + button to add new folder in the given directory. Give some name
+<img src="/docs/screenshots/8.png" alt="Add new folder" width="550">
+
+0. New folder now appears in the given directory. You can navigate and add further folders inside it.
+<img src="/docs/screenshots/9.png" alt="New folder added" width="550">
+
 
 
 ## TODO:
