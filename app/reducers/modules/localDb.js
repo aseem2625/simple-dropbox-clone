@@ -351,6 +351,9 @@ const localDB = (() => {
                 // 3. Insert key in parent's children object
                 itemCollection.every((item)=>{
                     if (item.id === parentId) {
+                        if (!item.children) {
+                            item.children = [];
+                        }
                         item.children.push(
                             {id: newItemId, type: 'folder'},
                         );
